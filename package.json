@@ -1,0 +1,16 @@
+{
+  "name": "notnta",
+  "version": "1.1.0",
+  "description": "Introducing National Troll Agency , a project inspired by online web party games with an element of learning and preparation for competitive exams in a gamified platform. Still under development.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "standard-version"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "standard-version": "^9.5.0"
+  }
+}
