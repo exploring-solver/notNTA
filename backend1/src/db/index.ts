@@ -1,5 +1,13 @@
-import { PrismaClient } from '@prisma/client';
+import { MongoClient } from 'mongodb';
 
-const client = new PrismaClient();
+const url = 'mongodb://localhost:27017';
+const dbName = 'your-db-name';
 
-export const db = client;
+let db: MongoClient;
+
+export const connectDB = async () => {
+  db = await MongoClient.connect(url);
+  console.log('Connected to database');
+};
+
+export const getDB = () => db.db(dbName);

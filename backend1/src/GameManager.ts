@@ -1,40 +1,19 @@
-import { WebSocket } from 'ws';
-import { INIT_GAME } from './messages';
 import { Game } from './Game';
+import { User } from './SocketManager';
 
+export class GameManager {
+  private games: Map<string, Game> = new Map();
 
-//User, Game
-export class GameManager{
-    private games: Game[];
-    private pendingUser: WebSocket;
-    private users: WebSocket[];
+  addUser(user: User) {
+    // Add user to a game
+  }
 
-    constructor(){
-        this.games = [];
-    }
+  removeUser(ws: WebSocket) {
+    // Remove user from a game
+  }
 
-    addUser(socket: WebSocket) {
-        this.users.push(socket);
-    }
-
-    removeUser(socket: WebSocket){
-        this.users = this.users.filter(user => user !== socket);
-        //Stop the game here because the user left
-    }
-
-    private addHandler(socket: WebSocket){
-        socket.on("message", (data) => {
-            const message = JSON.parse(data.toString());
-
-            if(message.type === INIT_GAME){
-                if(this.pendingUser){
-                    //start game
-                } else{
-                    this.pendingUser = socket;
-                }
-            }
-        })
-
-    }
+  createGame() {
+    const newGame = new Game();
+    // Save to db and manage game logic
+  }
 }
-
