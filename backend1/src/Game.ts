@@ -1,6 +1,5 @@
 import { WebSocketServer } from "ws";
 
-
 export class Game{
 
     private player1: WebSocketServer;
