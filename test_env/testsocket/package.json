@@ -1,0 +1,16 @@
+{
+    "name": "socket-game-backend",
+    "version": "1.0.0",
+    "description": "Backend for 5v5 socket game",
+    "main": "server.js",
+    "scripts": {
+      "dev": "nodemon server.js",
+      "start": "node server.js"
+    },
+    "dependencies": {
+      "express": "^4.17.1",
+      "mongoose": "^5.13.8",
+      "socket.io": "^4.3.2"
+    }
+  }
+  

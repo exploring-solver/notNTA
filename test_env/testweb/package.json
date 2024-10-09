@@ -1,0 +1,13 @@
+{
+    "name": "socket-game-frontend",
+    "version": "1.0.0",
+    "description": "Frontend for 5v5 socket game",
+    "main": "index.js",
+    "scripts": {
+      "start": "http-server public"
+    },
+    "dependencies": {
+      "socket.io-client": "^4.3.2"
+    }
+  }
+  

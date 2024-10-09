@@ -1,0 +1,32 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5v5 Quiz Game</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Use the Socket.IO CDN instead of the server -->
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>5v5 Quiz Game</h1>
+        <div id="gameInfo">
+            <p>Team Turn: <span id="teamTurn">Red</span></p>
+            <p>Current Round: <span id="currentRound">1</span></p>
+            <p>Red Team Score: <span id="redTeamScore">0</span></p>
+            <p>Blue Team Score: <span id="blueTeamScore">0</span></p>
+        </div>
+        <button id="joinRed">Join Red Team</button>
+        <button id="joinBlue">Join Blue Team</button>
+        <div id="questionSection">
+            <p>Question: <span id="question">Waiting for your turn...</span></p>
+            <button onclick="submitAnswer(true)">Correct</button>
+            <button onclick="submitAnswer(false)">Incorrect</button>
+        </div>
+        <div id="resultSection"></div>
+    </div>
+</body>
+</html>
