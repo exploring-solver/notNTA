@@ -42,20 +42,21 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   // Handle player joining the game
-  socket.on('joinGame', (data) => {
-    currentPlayers.push({ id: socket.id, team: data.team });
+  socket.on('joinGame', async (data) => {
+    console.log('Join game initiated:', data);
+    const { team, gameId } = data;
+    currentPlayers.push({ id: socket.id, team: team, gameId: gameId });
     io.emit('playerJoined', { players: currentPlayers });
-    console.log(`Player joined - ID: ${socket.id}, Team: ${data.team}`);
+    console.log(`Player joined - ID: ${socket.id}, Team: ${team}, Game ID: ${gameId}`);
   });
+  
 
   // Handle answering a question
   socket.on('answerQuestion', async (data) => {
     console.log('Answer received:', data);
-
     try {
-      const { correct } = data;
-      const game = await Game.findOne();
-
+      const { correct, gameId } = data;
+      const game = await Game.findById(gameId);
       if (!game) {
         console.error('Game not found.');
         socket.emit('errorMessage', { message: 'Game not found' });

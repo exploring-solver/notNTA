@@ -1,32 +1,48 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>5v5 Quiz Game</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Use the Socket.IO CDN instead of the server -->
     <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
-    <script src="app.js" defer></script>
 </head>
+
 <body>
     <div class="container">
         <h1>5v5 Quiz Game</h1>
-        <div id="gameInfo">
+        <button onclick="startGame()">Start Game</button>
+        <div id="gameInfo" style="display: none;">
             <p>Team Turn: <span id="teamTurn">Red</span></p>
             <p>Current Round: <span id="currentRound">1</span></p>
             <p>Red Team Score: <span id="redTeamScore">0</span></p>
             <p>Blue Team Score: <span id="blueTeamScore">0</span></p>
         </div>
-        <button id="joinRed">Join Red Team</button>
-        <button id="joinBlue">Join Blue Team</button>
-        <div id="questionSection">
+        <button onclick="joinTeam('red')" style="display: none;">Join Red Team</button>
+        <button onclick="joinTeam('blue')" style="display: none;">Join Blue Team</button>
+        <div id="questionSection" style="display: none;">
             <p>Question: <span id="question">Waiting for your turn...</span></p>
             <button onclick="submitAnswer(true)">Correct</button>
             <button onclick="submitAnswer(false)">Incorrect</button>
         </div>
         <div id="resultSection"></div>
     </div>
+    <!-- Make sure the app.js script is loaded after the DOM content -->
+    <script src="app.js" defer></script>
 </body>
+<script>
+    function joinTeam(selectedTeam) {
+        team = selectedTeam;
+        socket.emit('joinGame', { team, gameId: game._id });
+        // Hide the join team buttons
+        document.querySelector('button[onclick="joinTeam(\'red\')"]').style.display = 'none';
+        document.querySelector('button[onclick="joinTeam(\'blue\')"]').style.display = 'none';
+        // Show the game info and question sections
+        document.getElementById('gameInfo').style.display = 'block';
+        document.getElementById('questionSection').style.display = 'block';
+    }
+
+</script>
+
 </html>
