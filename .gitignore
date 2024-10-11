@@ -3,3 +3,4 @@ test.txt
 package-lock.json
 
 /backend1/dist
+*.env
