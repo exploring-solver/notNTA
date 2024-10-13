@@ -24,3 +24,22 @@ export const updateGameSettings = async (roomCode, settings) => {
   const response = await axios.put(`${API_BASE_URL}/settings/${roomCode}`, settings);
   return response.data;
 };
+
+export const reconnectToGame = async (roomCode, playerName, isHost) => {
+  try {
+    const response = await fetch('/api/reconnect', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ roomCode, playerName, isHost }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to reconnect to game');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error reconnecting to game:', error);
+    throw error;
+  }
+};

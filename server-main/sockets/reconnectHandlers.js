@@ -1,36 +1,45 @@
-// sockets/reconnectHandlers.js
-
 const { getGameByRoomCode, isPlayerInGame, getCurrentGameState } = require('../utils/gameUtils');
 
 module.exports = (io, socket) => {
   // Handle reconnection
   socket.on('reconnectToGame', async ({ roomCode, name }) => {
-    const game = await getGameByRoomCode(roomCode);
+    console.log('Reconnection attempt:', { roomCode, name });
 
-    if (!game) {
-      socket.emit('rejoinFailed', { message: 'Game not found' });
-      return;
-    }
+    try {
+      const game = await getGameByRoomCode(roomCode);
+      console.log(`Game found: ${game ? 'Yes' : 'No'} for roomCode: ${roomCode}`);
 
-    const player = game.players.find((p) => p.name === name);
+      if (!game) {
+        socket.emit('rejoinFailed', { message: 'Game not found' });
+        console.log(`Game not found for room code: ${roomCode}`);
+        return;
+      }
 
-    if (player) {
-      // Update socket ID
-      player.socketId = socket.id;
-      await game.save();
+      const player = game.players.find((p) => p.name === name);
+      console.log(`Player found in game: ${player ? 'Yes' : 'No'}`);
 
-      socket.join(roomCode);
-      socket.name = name;
-      socket.roomCode = roomCode;
-      socket.isHost = player.isHost;
+      if (player) {
+        // Update socket ID
+        console.log('Updating player socketId:', { oldSocketId: player.socketId, newSocketId: socket.id });
+        player.socketId = socket.id;
+        await game.save();
 
-      const gameState = getCurrentGameState(game);
+        socket.join(roomCode);
+        socket.name = name;
+        socket.roomCode = roomCode;
+        socket.isHost = player.isHost;
 
-      socket.emit('rejoinSuccess', gameState);
-      console.log(`${name} rejoined room ${roomCode}`);
-    } else {
-      socket.emit('rejoinFailed', { message: 'Player not found in game' });
-      console.log(`Rejoin failed for ${name} in room ${roomCode}`);
+        const gameState = getCurrentGameState(game);
+        socket.emit('rejoinSuccess', gameState);
+
+        console.log(`${name} successfully rejoined room ${roomCode}`);
+      } else {
+        socket.emit('rejoinFailed', { message: 'Player not found in game' });
+        console.log(`Player ${name} not found in game for room ${roomCode}`);
+      }
+    } catch (error) {
+      console.error(`Error during reconnection for room ${roomCode}:`, error);
+      socket.emit('rejoinFailed', { message: 'Internal server error' });
     }
   });
 };

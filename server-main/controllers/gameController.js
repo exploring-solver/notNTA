@@ -8,35 +8,56 @@ exports.createGame = async (req, res) => {
     const { name } = req.body;
     const roomCode = generateRoomCode();
 
+    // Generate a temporary hostId
+    const temporaryHostId = `temp_${Date.now()}`;
+
     const newGame = new Game({
       roomCode,
-      hostId: null, // Will be set when the host connects via Socket.IO
-      players: [],
+      hostId: temporaryHostId, // Set a temporary hostId
+      players: [{
+        socketId: temporaryHostId,
+        name: name,
+        isHost: true
+      }],
       settings: {},
       questions: [],
+      gameState: 'lobby'
     });
 
     await newGame.save();
 
-    res.status(201).json({ roomCode, message: 'Game created successfully' });
+    res.status(201).json({ 
+      roomCode, 
+      temporaryHostId,
+      message: 'Game created successfully' 
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating game', error });
+    res.status(500).json({ message: 'Error creating game', error: error.message });
   }
 };
 
 // Join an existing game
 exports.joinGame = async (req, res) => {
   try {
-    const { roomCode } = req.body;
+    const { roomCode, name } = req.body;
     const game = await Game.findOne({ roomCode });
 
     if (!game) {
       return res.status(404).json({ message: 'Game not found' });
     }
 
+    // Add the player to the game
+    game.players.push({
+      socketId: `temp_${Date.now()}`,
+      name: name,
+      isHost: false
+    });
+
+    await game.save();
+
     res.status(200).json({ message: 'Joined game successfully', gameState: game.gameState });
   } catch (error) {
-    res.status(500).json({ message: 'Error joining game', error });
+    res.status(500).json({ message: 'Error joining game', error: error.message });
   }
 };
 
@@ -52,6 +73,6 @@ exports.getGameState = async (req, res) => {
 
     res.status(200).json(game);
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching game state', error });
+    res.status(500).json({ message: 'Error fetching game state', error: error.message });
   }
 };

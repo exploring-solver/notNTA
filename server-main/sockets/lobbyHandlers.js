@@ -7,13 +7,15 @@ module.exports = (io, socket) => {
   socket.on('createGame', async ({ name }) => {
     const roomCode = generateRoomCode();
     socket.join(roomCode);
-    socket.name = name; 
+    socket.name = name;
     socket.roomCode = roomCode;
     socket.isHost = true;
 
     const game = await createNewGame(roomCode, name, socket.id);
 
-    io.to(roomCode).emit('gameCreated', { roomCode, game });
+    // Notify the client
+    socket.emit('gameCreated', { roomCode, playerName: name });
+
     console.log(`Game created by ${name} with room code ${roomCode}`);
   });
 
@@ -26,17 +28,7 @@ module.exports = (io, socket) => {
       return;
     }
 
-    // Check if game is in lobby state
-    if (game.gameState !== 'lobby') {
-      socket.emit('errorMessage', { message: 'Game has already started' });
-      return;
-    }
-
-    // Check for max players
-    if (game.players.length >= game.settings.maxPlayers) {
-      socket.emit('errorMessage', { message: 'Game is full' });
-      return;
-    }
+    // Additional checks...
 
     socket.join(roomCode);
     socket.name = name;
@@ -54,7 +46,12 @@ module.exports = (io, socket) => {
 
     await game.save();
 
-    io.to(roomCode).emit('userJoined', { id: socket.id, name });
+    // Notify the client
+    socket.emit('gameJoined', { roomCode, playerName: name });
+
+    // Notify other players
+    io.to(roomCode).emit('userJoined', { players: game.players });
+
     console.log(`${name} joined room ${roomCode}`);
   });
 

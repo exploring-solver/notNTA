@@ -1,24 +1,54 @@
-import React, { useState } from 'react';
-import { createGame, joinGame } from '../services/api';
+// pages/Home.js
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGameContext } from '../context/GameContext';
 
 const Home = () => {
-  const { setGameState, setGameData } = useGameContext();
+  const {
+    socket,
+    gameState,
+    gameData,
+    setGameData,
+    setIsActiveGame,
+    isActiveGame,
+  } = useGameContext();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
+  const navigate = useNavigate();
 
-  const handleCreateGame = async () => {
+  useEffect(() => {
+    // Check if there's stored game data for reconnection
+    const storedGameData = JSON.parse(localStorage.getItem('gameData'));
+    if (storedGameData && !isActiveGame) {
+      const { roomCode } = storedGameData;
+      setGameData(storedGameData);
+      setIsActiveGame(true);
+      navigate(`/lobby/${roomCode}`);
+    }
+  }, [setGameData, setIsActiveGame, navigate, isActiveGame]);
+
+  useEffect(() => {
+    if (gameState === 'lobby' && gameData?.roomCode) {
+      navigate(`/lobby/${gameData.roomCode}`);
+    }
+  }, [gameState, gameData, navigate]);
+
+  const handleCreateGame = () => {
     if (name.trim() === '') return;
-    const data = await createGame(name);
-    setGameData({ roomCode: data.roomCode, isHost: true });
-    setGameState('lobby');
+    if (!socket) {
+      console.error('Socket not connected');
+      return;
+    }
+    socket.emit('createGame', { name });
   };
 
-  const handleJoinGame = async () => {
+  const handleJoinGame = () => {
     if (name.trim() === '' || roomCode.trim() === '') return;
-    const data = await joinGame(name, roomCode);
-    setGameData({ roomCode, isHost: false });
-    setGameState('lobby');
+    if (!socket) {
+      console.error('Socket not connected');
+      return;
+    }
+    socket.emit('joinGame', { name, roomCode });
   };
 
   return (

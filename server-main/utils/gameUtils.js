@@ -3,6 +3,24 @@
 const Game = require('../models/Game');
 const Question = require('../models/Question');
 
+exports.getCurrentGameState = (game) => {
+  return {
+    roomCode: game.roomCode,
+    gameState: game.gameState,
+    currentRound: game.currentRound,
+    redTeamScore: game.redTeamScore,
+    blueTeamScore: game.blueTeamScore,
+    currentQuestionIndex: game.currentQuestionIndex,
+    players: game.players.map(player => ({
+      name: player.name,
+      team: player.team,
+      score: player.score,
+      isHost: player.isHost
+    })),
+    settings: game.settings,
+  };
+};
+
 exports.generateRoomCode = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let roomCode = '';
