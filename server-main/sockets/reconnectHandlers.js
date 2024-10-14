@@ -19,7 +19,6 @@ module.exports = (io, socket) => {
       console.log(`Player found in game: ${player ? 'Yes' : 'No'}`);
 
       if (player) {
-        // Update socket ID
         console.log('Updating player socketId:', { oldSocketId: player.socketId, newSocketId: socket.id });
         player.socketId = socket.id;
         await game.save();
@@ -30,9 +29,18 @@ module.exports = (io, socket) => {
         socket.isHost = player.isHost;
 
         const gameState = getCurrentGameState(game);
-        socket.emit('rejoinSuccess', gameState);
 
+        // Send the players array along with the game state
+        socket.emit('rejoinSuccess', {
+          roomCode: game.roomCode,
+          gameState,
+          players: game.players, // Send the array of players
+        });
+        console.log(game.players);
         console.log(`${name} successfully rejoined room ${roomCode}`);
+
+        // Once the reconnection is successful, remove the listener to prevent further reconnection attempts
+        socket.removeAllListeners('reconnectToGame');
       } else {
         socket.emit('rejoinFailed', { message: 'Player not found in game' });
         console.log(`Player ${name} not found in game for room ${roomCode}`);

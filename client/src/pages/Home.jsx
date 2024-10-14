@@ -1,4 +1,3 @@
-// pages/Home.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameContext } from '../context/GameContext';
@@ -39,7 +38,30 @@ const Home = () => {
       console.error('Socket not connected');
       return;
     }
+
+    // Store name separately in localStorage
+    localStorage.setItem('playerName', name);
+
+    // Emit 'createGame' event with player name
     socket.emit('createGame', { name });
+
+    // Listen for the game creation response from the server
+    socket.on('gameCreated', (data) => {
+      const { roomCode } = data;
+      const gameData = {
+        roomCode,
+        playerName: name,
+        socketId: socket.id,
+        isHost: true,  // This player is the host when creating a game
+      };
+
+      // Store game data in context
+      setGameData(gameData);
+      setIsActiveGame(true);
+
+      // Navigate to the lobby
+      navigate(`/lobby/${roomCode}`);
+    });
   };
 
   const handleJoinGame = () => {
@@ -48,7 +70,29 @@ const Home = () => {
       console.error('Socket not connected');
       return;
     }
+
+    // Store name separately in localStorage
+    localStorage.setItem('playerName', name);
+
+    // Emit 'joinGame' event with player name and room code
     socket.emit('joinGame', { name, roomCode });
+
+    // Listen for the game joining response from the server
+    socket.on('gameJoined', (data) => {
+      const gameData = {
+        roomCode,
+        playerName: name,
+        socketId: socket.id,
+        isHost: false,  // This player is not the host when joining a game
+      };
+
+      // Store game data in context
+      setGameData(gameData);
+      setIsActiveGame(true);
+
+      // Navigate to the lobby
+      navigate(`/lobby/${roomCode}`);
+    });
   };
 
   return (

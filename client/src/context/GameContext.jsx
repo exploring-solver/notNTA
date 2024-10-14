@@ -1,4 +1,3 @@
-// context/GameContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
@@ -27,11 +26,12 @@ export const GameProvider = ({ children }) => {
       
       // Check if there's stored game data for reconnection
       const storedGameData = JSON.parse(localStorage.getItem('gameData'));
+      const playerName = localStorage.getItem('playerName'); // Get player name from localStorage
       if (storedGameData) {
-        const { name, roomCode, socketId } = storedGameData;
+        const { roomCode, socketId } = storedGameData;
         
         // Emit a reconnect event
-        newSocket.emit('reconnectToGame', { name, roomCode, socketId });
+        newSocket.emit('reconnectToGame', { name: playerName, roomCode, socketId });
       }
     });
 
@@ -51,10 +51,11 @@ export const GameProvider = ({ children }) => {
 
     // Game created
     socket.on('gameCreated', (data) => {
+      const playerName = localStorage.getItem('playerName'); // Get player name from localStorage
       const gameData = {
         roomCode: data.roomCode,
         isHost: true,
-        playerName: data.playerName,
+        playerName: playerName,
         socketId: socket.id,  // Store socketId here
       };
       setGameData(gameData);
@@ -65,10 +66,11 @@ export const GameProvider = ({ children }) => {
 
     // Game joined
     socket.on('gameJoined', (data) => {
+      const playerName = localStorage.getItem('playerName'); // Get player name from localStorage
       const gameData = {
         roomCode: data.roomCode,
         isHost: false,
-        playerName: data.playerName,
+        playerName: playerName,
         socketId: socket.id,  // Store socketId here
       };
       setGameData(gameData);
@@ -79,9 +81,10 @@ export const GameProvider = ({ children }) => {
 
     // Reconnection successful
     socket.on('rejoinSuccess', (gameData) => {
+      const playerName = localStorage.getItem('playerName'); // Get player name from localStorage
       setGameData({
         roomCode: gameData.roomCode,
-        playerName: gameData.playerName,
+        playerName: playerName,
         socketId: socket.id,
       });
       setGameState(gameData.gameState);
@@ -91,7 +94,7 @@ export const GameProvider = ({ children }) => {
 
     socket.on('rejoinFailed', (data) => {
       alert(data.message);
-      localStorage.removeItem('gameData');
+      // localStorage.removeItem('gameData');
       setGameData(null);
       setGameState('home');
     });
