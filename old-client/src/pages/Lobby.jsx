@@ -17,70 +17,151 @@ const Lobby = () => {
     setIsActiveGame
   } = useGameContext();
 
-  useEffect(() => {
-    console.log(players);
+  // useEffect(() => {
     
-    const playerName = localStorage.getItem('playerName'); // Get player name from localStorage
+  //   const playerName = localStorage.getItem('playerName'); // Get player name from localStorage
+    
+  //   if (!socket || !gameData) {
+  //     console.log('Socket or gameData not available', { socket, gameData });
+  //     return;
+  //   }
+    
+  //   // Register `rejoinSuccess` listener at the very beginning
+    
+  //   // Emit reconnectToGame after the listener is registered
+  //   console.log('Attempting to reconnect to the game:', {
+  //     name: playerName,
+  //     roomCode: roomCode,
+  //     socketId: gameData.socketId,
+  //   });
+    
+  //   socket.emit('reconnectToGame', {
+  //     name: playerName,
+  //     roomCode: roomCode,
+  //     socketId: gameData.socketId,
+  //   });
+  //   socket.on('rejoinSuccess', (data) => {
+  //     console.log('Rejoined game successfully:', data);
+      
+  //     // Set players array
+  //     setPlayers(data.players);
+      
+  //     // Set the game data
+  //     setGameData({
+  //       roomCode: data.roomCode,
+  //       playerName: playerName,
+  //       socketId: socket.id,
+  //     });
+      
+  //     // Set the game state
+  //     setGameState(data.gameState);
+      
+  //     // Mark the game as active
+  //     setIsActiveGame(true);
+      
+  //     // Update localStorage with the new game data
+  //     localStorage.setItem('gameData', JSON.stringify(data));
+  //   });
+  //   console.log(players);
+    
+  //   // Other listeners
+  //   socket.on('userJoined', (data) => {
+  //     console.log('A new user joined:', data);
+  //     setPlayers(data.players);
+  //   });
 
+  //   socket.on('gameStarted', (data) => {
+  //     console.log('The game has started:', data);
+  //     setGameState('playing');
+  //     navigate(`/game/${roomCode}`);
+  //   });
+
+  //   socket.on('userDisconnected', (data) => {
+  //     console.log('A user disconnected:', data);
+  //     setPlayers((prevPlayers) => prevPlayers.filter((player) => player.socketId !== data.id));
+  //   });
+
+  //   socket.on('gameSettingsUpdated', (newSettings) => {
+  //     console.log('Game settings were updated:', newSettings);
+  //     setGameData((prevData) => ({
+  //       ...prevData,
+  //       settings: newSettings,
+  //     }));
+  //   });
+
+  //   return () => {
+  //     console.log('Cleaning up socket listeners');
+  //     socket.off('rejoinSuccess');
+  //     socket.off('userJoined');
+  //     socket.off('gameStarted');
+  //     socket.off('userDisconnected');
+  //     socket.off('gameSettingsUpdated');
+  //   };
+  // }, [socket, gameData, roomCode, setPlayers, setGameState, navigate]);
+
+
+  useEffect(() => {
+    const playerName = localStorage.getItem('playerName'); // Get player name from localStorage
+    
     if (!socket || !gameData) {
       console.log('Socket or gameData not available', { socket, gameData });
       return;
     }
-
-    // Register `rejoinSuccess` listener at the very beginning
+  
+    // Register the listener first, before emitting reconnectToGame
     socket.on('rejoinSuccess', (data) => {
       console.log('Rejoined game successfully:', data);
-
+      
       // Set players array
       setPlayers(data.players);
-
+      
       // Set the game data
       setGameData({
         roomCode: data.roomCode,
         playerName: playerName,
         socketId: socket.id,
       });
-
+      
       // Set the game state
       setGameState(data.gameState);
-
+      
       // Mark the game as active
       setIsActiveGame(true);
-
+      
       // Update localStorage with the new game data
       localStorage.setItem('gameData', JSON.stringify(data));
     });
-
-    // Emit reconnectToGame after the listener is registered
+  
     console.log('Attempting to reconnect to the game:', {
       name: playerName,
       roomCode: roomCode,
       socketId: gameData.socketId,
     });
-
+  
+    // Emit reconnectToGame after the listener is registered
     socket.emit('reconnectToGame', {
       name: playerName,
       roomCode: roomCode,
       socketId: gameData.socketId,
     });
-
+  
     // Other listeners
     socket.on('userJoined', (data) => {
       console.log('A new user joined:', data);
       setPlayers(data.players);
     });
-
+  
     socket.on('gameStarted', (data) => {
       console.log('The game has started:', data);
       setGameState('playing');
       navigate(`/game/${roomCode}`);
     });
-
+  
     socket.on('userDisconnected', (data) => {
       console.log('A user disconnected:', data);
       setPlayers((prevPlayers) => prevPlayers.filter((player) => player.socketId !== data.id));
     });
-
+  
     socket.on('gameSettingsUpdated', (newSettings) => {
       console.log('Game settings were updated:', newSettings);
       setGameData((prevData) => ({
@@ -88,7 +169,7 @@ const Lobby = () => {
         settings: newSettings,
       }));
     });
-
+  
     return () => {
       console.log('Cleaning up socket listeners');
       socket.off('rejoinSuccess');
@@ -98,7 +179,7 @@ const Lobby = () => {
       socket.off('gameSettingsUpdated');
     };
   }, [socket, gameData, roomCode, setPlayers, setGameState, navigate]);
-
+  
   const handleStartGame = () => {
     if (gameData && gameData.isHost) {
       console.log('Starting game for roomCode:', roomCode);
