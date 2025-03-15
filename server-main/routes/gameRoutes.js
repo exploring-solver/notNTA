@@ -4,8 +4,9 @@ const express = require('express');
 const router = express.Router();
 const gameController = require('../controllers/gameController');
 const settingsRoutes = require('./settingsRoutes');
+const auth = require('../middleware/authMiddleware');
 // Create a new game
-router.post('/create', gameController.createGame);
+router.post('/create',auth, gameController.createGame);
 
 // Join an existing game
 router.post('/join', gameController.joinGame);

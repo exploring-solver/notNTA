@@ -5,18 +5,14 @@ const { generateRoomCode } = require('../utils/gameUtils');
 // Create a new game
 exports.createGame = async (req, res) => {
   try {
-    const { name } = req.body;
     const roomCode = generateRoomCode();
-
-    // Generate a temporary hostId
-    const temporaryHostId = `temp_${Date.now()}`;
 
     const newGame = new Game({
       roomCode,
-      hostId: temporaryHostId, // Set a temporary hostId
+      hostId: req.user._id,
       players: [{
-        socketId: temporaryHostId,
-        name: name,
+        userId: req.user._id,
+        name: req.user.name,
         isHost: true
       }],
       settings: {},
@@ -27,8 +23,7 @@ exports.createGame = async (req, res) => {
     await newGame.save();
 
     res.status(201).json({ 
-      roomCode, 
-      temporaryHostId,
+      roomCode,
       message: 'Game created successfully' 
     });
   } catch (error) {
@@ -45,13 +40,6 @@ exports.joinGame = async (req, res) => {
     if (!game) {
       return res.status(404).json({ message: 'Game not found' });
     }
-
-    // Add the player to the game
-    game.players.push({
-      socketId: `temp_${Date.now()}`,
-      name: name,
-      isHost: false
-    });
 
     await game.save();
 

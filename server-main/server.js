@@ -29,7 +29,11 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // API routes
 const gameRoutes = require('./routes/gameRoutes');
-app.use('/api/game', gameRoutes);
+app.use('/api/games', gameRoutes);
+const authRoutes = require('./routes/authRoutes');
+app.use('/api/auth', authRoutes);
+// const testRoutes = require('./routes/testRoutes');
+// app.use('/api/test', testRoutes);
 
 // Socket.IO handlers
 require('./sockets')(io);

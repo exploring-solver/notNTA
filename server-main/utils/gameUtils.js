@@ -72,4 +72,52 @@ exports.updateGameSettings = async (roomCode, settings) => {
   return game;
 };
 
-// Other utility functions can be added here as needed
+exports.checkAnswer = async (questionId, answer, timeTaken) => {
+  const question = await Question.findById(questionId);
+  const isCorrect = question.correctAnswer === answer;
+  
+  // Calculate score based on time taken and correctness
+  const baseScore = 1000;
+  const timeMultiplier = Math.max(0, 1 - (timeTaken / 120)); // 120 seconds max
+  const scoreChange = isCorrect ? Math.floor(baseScore * timeMultiplier) : 0;
+  
+  return { isCorrect, scoreChange };
+};
+
+exports.updatePlayerScore = (game, socketId, scoreChange) => {
+  const player = game.players.find(p => p.socketId === socketId);
+  if (player) {
+    player.score += scoreChange;
+    if (player.team === 'red') {
+      game.redTeamScore += scoreChange;
+    } else if (player.team === 'blue') {
+      game.blueTeamScore += scoreChange;
+    }
+  }
+};
+
+exports.isRoundComplete = (game) => {
+  return game.players.every(player => player.hasAnswered);
+};
+
+exports.startNextRound = async (io, game) => {
+  game.currentRound++;
+  game.players.forEach(player => {
+    player.hasAnswered = false;
+  });
+  
+  // Get next question
+  const nextQuestion = game.questions[game.currentQuestionIndex];
+  game.currentQuestionIndex++;
+  
+  io.to(game.roomCode).emit('roundStarted', {
+    question: nextQuestion,
+    round: game.currentRound
+  });
+  
+  await game.save();
+};
+
+exports.isGameOver = (game) => {
+  return game.currentRound >= game.settings.rounds;
+};
